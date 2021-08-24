@@ -19,7 +19,7 @@ function createShape(e) {
 function selectShape(e) {
   for (let shape of shapeArr) {
     let dist = Math.sqrt((shape.x - e.offsetX)**2 + (shape.y - e.offsetY)**2);
-    if (dist <= shape.r) {shapeToBind = shape;}
+    if (dist <= shape.rad) {shapeToBind = shape;}
   }
 }
 function mouseDown(e) {
@@ -36,8 +36,8 @@ function keyPressed(e) {
     if (e.key === 'd') {shapeToBind.x += 3;}
     if (e.key === 's') {shapeToBind.y += 3;}
     if (e.key === 'a') {shapeToBind.x -= 3;}
-    if (e.key === 'q') {shapeToBind.a -= shapeToBind.tr;}
-    if (e.key === 'e') {shapeToBind.a += shapeToBind.tr;}
+    if (e.key === 'q') {shapeToBind.ang -= shapeToBind.tr;}
+    if (e.key === 'e') {shapeToBind.ang += shapeToBind.tr;}
   }
 }
 
@@ -56,8 +56,8 @@ function gameLoop() {
   for (let sh1 = 0; sh1 < shapeArr.length-1; sh1++) {
     for (let sh2 = sh1+1; sh2 < shapeArr.length; sh2++) {
       let shape1 = shapeArr[sh1], shape2 = shapeArr[sh2];
-      if (shape1.ap) {shape1 = shape1.ap;}
-      if (shape2.ap) {shape2 = shape2.ap;}
+      if (shape1.aPnts) {shape1 = shape1.aPnts;}
+      if (shape2.aPnts) {shape2 = shape2.aPnts;}
       let collision = sepAx(shape1, shape2);
       if (collision) {shapeArr[sh1].color = 'red';  shapeArr[sh2].color = 'red';}
     }

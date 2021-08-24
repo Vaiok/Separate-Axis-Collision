@@ -11,7 +11,7 @@ const sepAx = (function() {
   }
   function circleMags(obj, vec) {
     let pointMag = (obj.x*vec.x + obj.y*vec.y) / (vec.x**2 + vec.y**2);
-    return {min: pointMag - obj.r, max: pointMag + obj.r};
+    return {min: pointMag - obj.rad, max: pointMag + obj.rad};
   }
   function polyToPoly(obj1, obj2) {
     for (let obj = 0; obj < 2; obj++) {
@@ -44,10 +44,10 @@ const sepAx = (function() {
   }
   function circleToCircle(obj1, obj2) {
     let dist = Math.sqrt((obj1.x - obj2.x)**2 + (obj1.y - obj2.y)**2);
-    if (dist > obj1.r + obj2.r) {return false;}
+    if (dist > obj1.rad + obj2.rad) {return false;}
     else {return true;}
   }
-  
+
   return function(obj1, obj2) {
     if (Array.isArray(obj1) && Array.isArray(obj2)) {return polyToPoly(obj1, obj2);}
     if (Array.isArray(obj1) && !Array.isArray(obj2)) {return polyToCircle(obj1, obj2);}
