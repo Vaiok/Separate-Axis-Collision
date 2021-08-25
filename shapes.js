@@ -13,16 +13,22 @@ function Shape(ctx, color = 'white', x = 0, y = 0, ang = 0, rad = 10, pnts = 1) 
     this.rPnts = [];
     this.aPnts = [];
     for (let i = 0; i < pnts; i++) {
-      this.rPnts[i] = {x: Math.cos(Math.PI*2/pnts*i + this.ang)*this.rad,
-                    y: Math.sin(Math.PI*2/pnts*i + this.ang)*this.rad};
+      let rndmAng = Math.floor(Math.random()*Math.PI/18) - Math.PI/36;
+      let rndmRad = Math.floor(Math.random()*10) - 5;
+      this.rPnts[i] = {x: Math.cos(Math.PI*2/pnts*i + rndmAng + this.ang)*(this.rad + rndmRad),
+                    y: Math.sin(Math.PI*2/pnts*i + rndmAng + this.ang)*(this.rad + rndmRad)};
+      this.rPnts[i].rad = Math.sqrt(this.rPnts[i].x**2 + this.rPnts[i].y**2);
+      let x1 = this.rPnts[i].x, x2 = this.rPnts[i].rad, y1 = this.rPnts[i].y, y2 = 0;
+      this.rPnts[i].ang = Math.acos((x1*x2 + y1*y2) / (Math.sqrt(x1**2 + y1**2)*Math.sqrt(x2**2 + y2**2)));
+      if (this.rPnts[i].y < 0) {this.rPnts[i].ang *= -1;}
     }
   }
 }
 Shape.prototype.updatePos = function() {
   if (this.type === 'polygon') {
     for (let i = 0; i < this.rPnts.length; i++) {
-      this.rPnts[i] = {x: Math.cos(Math.PI*2/this.rPnts.length*i + this.ang)*this.rad,
-                    y: Math.sin(Math.PI*2/this.rPnts.length*i + this.ang)*this.rad};
+      this.rPnts[i].x = Math.cos(this.rPnts[i].ang + this.ang)*this.rPnts[i].rad;
+      this.rPnts[i].y = Math.sin(this.rPnts[i].ang + this.ang)*this.rPnts[i].rad;
       this.aPnts[i] = {x: this.x + this.rPnts[i].x, y: this.y + this.rPnts[i].y};
     }
   }
