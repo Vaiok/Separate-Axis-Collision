@@ -43,7 +43,7 @@ const sepAx = (function() {
     return true;
   }
   function circleToCircle(obj1, obj2) {
-    let dist = Math.sqrt((obj1.x - obj2.x)**2 + (obj1.y - obj2.y)**2);
+    let dist = Math.hypot(obj1.x - obj2.x, obj1.y - obj2.y);
     if (dist > obj1.rad + obj2.rad) {return false;}
     else {return true;}
   }

@@ -2,72 +2,98 @@ const cnvs = document.querySelector('canvas');
 const ctx2d = cnvs.getContext('2d');
 cnvs.width = window.innerWidth;
 cnvs.height = window.innerHeight;
-let pointDiv = document.querySelector('#pointDiv');
-let pointDivX, pointDivY;
-pointDiv.style.width = cnvs.width/30 + 'px';
-pointDiv.style.height = cnvs.height/20 + 'px';
-pointDiv.style.display = 'none';
-let shapeToBind, shapeArr = [], pointCount = 2;
 
-function createShape(e) {
-  pointDivX = e.offsetX;
-  pointDivY = e.offsetY;
-  pointDiv.style.display = 'grid';
-  pointDiv.style.left = (pointDivX - pointDiv.style.width.replace('px', '')/2) + 'px';
-  pointDiv.style.top = (pointDivY - pointDiv.style.height.replace('px', '')/2) + 'px';
+let superShape, superShapeArr = [], newShapeArr = [], makingShape = false;
+
+function createSuperShape(e) {
+  superShapeArr.push(new Shape(ctx2d, e.offsetX, e.offsetY, 0, 55));
+  superShape = superShapeArr[superShapeArr.length-1];
 }
-function selectShape(e) {
-  for (let shape of shapeArr) {
-    let dist = Math.sqrt((shape.x - e.offsetX)**2 + (shape.y - e.offsetY)**2);
-    if (dist <= shape.rad) {shapeToBind = shape;}
+
+function selectSuperShape(e) {
+  let shapeFound = false;
+  for (let shape of superShapeArr) {
+    if (Math.hypot(e.offsetX - shape.x, e.offsetY - shape.y) <= shape.rad) {
+      superShape = shape;
+      shapeFound = true;
+    }
   }
+  if (!shapeFound) {createSuperShape(e);}
 }
+
+function createShape() {
+  if (newShapeArr.length < 2) {return;}
+  else if (newShapeArr.length === 2) {
+    let rad = Math.hypot(newShapeArr[1].absX - newShapeArr[0].absX, newShapeArr[1].absY - newShapeArr[0].absY);
+    superShape.addSubShape({type: 'circle', color: 'green', midPnt: newShapeArr[0], rad: rad});
+  }
+  else {superShape.addSubShape({type: 'polygon', color: 'green', pntsArr: newShapeArr});}
+}
+
 function mouseDown(e) {
-  if (pointDiv.style.display === 'none')
-  {
-    if (e.button === 0) {selectShape(e);}
-    if (e.button === 2) {createShape(e);}
+  if (!makingShape) {
+    if (e.button === 0) {selectSuperShape(e);}
+    if (e.button === 2) {
+      if (superShape === undefined) {createSuperShape(e);}
+      else {
+        newShapeArr = [];
+        makingShape = true;
+      }
+    }
+  }
+  else {
+    if (e.button === 0) {newShapeArr[newShapeArr.length] = {absX: e.offsetX, absY: e.offsetY};}
+    if (e.button === 2) {
+      createShape();
+      makingShape = false;
+    }
   }
 }
 
 function keyPressed(e) {
-  if (shapeToBind !== undefined) {
-    if (e.key === 'w') {shapeToBind.y -= 3;}
-    if (e.key === 'd') {shapeToBind.x += 3;}
-    if (e.key === 's') {shapeToBind.y += 3;}
-    if (e.key === 'a') {shapeToBind.x -= 3;}
-    if (e.key === 'q') {shapeToBind.ang -= shapeToBind.tr;}
-    if (e.key === 'e') {shapeToBind.ang += shapeToBind.tr;}
+  if (superShape !== undefined) {
+    if (e.key === 'w') {superShape.y -= 3;}
+    if (e.key === 'd') {superShape.x += 3;}
+    if (e.key === 's') {superShape.y += 3;}
+    if (e.key === 'a') {superShape.x -= 3;}
+    if (e.key === 'q') {superShape.ang -= superShape.tr;}
+    if (e.key === 'e') {superShape.ang += superShape.tr;}
   }
 }
 
 document.addEventListener('contextmenu', function(e) {e.preventDefault();});
 document.addEventListener('mousedown', mouseDown);
 document.addEventListener('keydown', keyPressed);
-document.querySelector('#pointButton').onclick = function() {
-  pointCount = document.querySelector('#pointPicker').value;
-  shapeArr.push(new Shape(ctx2d, 'green', pointDivX, pointDivY, 0, 55, pointCount));
-  pointDiv.style.display = 'none';
-}
 
 function gameLoop() {
-  for (let shape of shapeArr) {shape.color = 'green';}
+  for (let sprShp of superShapeArr) {for (let shape of sprShp.subShps) {shape.color = 'green';}}
   // Detect Collisions
-  for (let sh1 = 0; sh1 < shapeArr.length-1; sh1++) {
-    for (let sh2 = sh1+1; sh2 < shapeArr.length; sh2++) {
-      let shape1 = shapeArr[sh1], shape2 = shapeArr[sh2];
-      if (shape1.aPnts) {shape1 = shape1.aPnts;}
-      if (shape2.aPnts) {shape2 = shape2.aPnts;}
-      let collision = sepAx(shape1, shape2);
-      if (collision) {shapeArr[sh1].color = 'red';  shapeArr[sh2].color = 'red';}
+  for (let sh1 = 0; sh1 < superShapeArr.length-1; sh1++) {
+    for (let sh2 = sh1+1; sh2 < superShapeArr.length; sh2++) {
+      for (let shape1 of superShapeArr[sh1].subShps) {
+        for (let shape2 of superShapeArr[sh2].subShps) {
+          let firstShape = [], secondShape = [];
+          if (shape1.type === 'polygon') {
+            for (let shpPnt of shape1.pntsArr) {firstShape.push({x: shpPnt.absX, y: shpPnt.absY});}
+          }
+          if (shape2.type === 'polygon') {
+            for (let shpPnt of shape2.pntsArr) {secondShape.push({x: shpPnt.absX, y: shpPnt.absY});}
+          }
+          if (shape1.type === 'circle') {firstShape = {x: shape1.midPnt.absX, y: shape1.midPnt.absY, rad: shape1.rad};}
+          if (shape2.type === 'circle') {secondShape = {x: shape2.midPnt.absX, y: shape2.midPnt.absY, rad: shape2.rad};}
+          let collision = sepAx(firstShape, secondShape);
+          if (collision) {shape1.color = 'red', shape2.color = 'red';}
+        }
+      }
+
     }
   }
   // Draw
   ctx2d.fillStyle = 'black';
   ctx2d.fillRect(0, 0, cnvs.width, cnvs.height);
-  for (let shape of shapeArr) {
-    if (shape.updatePos) {shape.updatePos();}
-    shape.draw();
+  for (sprShp of superShapeArr) {
+    sprShp.updatePos();
+    sprShp.draw();
   }
   window.requestAnimationFrame(gameLoop);
 }
