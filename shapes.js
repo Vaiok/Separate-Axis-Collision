@@ -5,6 +5,7 @@ function Shape(ctx, x = 0, y = 0, ang = 0, rad = 25) {
   this.tr = Math.PI/60;
   this.ang = this.tr*ang;
   this.rad = rad;
+  this.selected = true;
   this.subShps = [];
 }
 Shape.prototype.addSubShape = function(newShape) {
@@ -49,6 +50,10 @@ Shape.prototype.updatePos = function() {
   }
 }
 Shape.prototype.draw = function() {
+  this.ctx.fillStyle = this.selected ? 'cyan' : 'blue';
+  this.ctx.beginPath();
+  this.ctx.arc(this.x, this.y, this.rad, 0, Math.PI*2, true);
+  this.ctx.fill();
   for (let shape of this.subShps) {
     this.ctx.fillStyle = shape.color;
     this.ctx.beginPath();

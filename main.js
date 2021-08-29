@@ -13,7 +13,9 @@ function createSuperShape(e) {
 function selectSuperShape(e) {
   let shapeFound = false;
   for (let shape of superShapeArr) {
+    shape.selected = false;
     if (Math.hypot(e.offsetX - shape.x, e.offsetY - shape.y) <= shape.rad) {
+      shape.selected = true;
       superShape = shape;
       shapeFound = true;
     }
