@@ -29,17 +29,29 @@ const sepAx = (function() {
     return true;
   }
   function polyToCircle(obj1, obj2) {
+    let cPoint, cDist;
     for (let vPoint = 0; vPoint < obj1.length; vPoint++) {
+      let newDist = Math.hypot(obj1[vPoint].x - obj2.x, obj1[vPoint].y - obj2.y);
+      if (cDist === undefined || cDist > newDist) {
+        cDist = newDist;
+        cPoint = vPoint;
+      }
       let othInd = vPoint + 1;
       if (vPoint === obj1.length-1) {othInd = 0;}
       let projVec = {x: -(obj1[othInd].y - obj1[vPoint].y), y: obj1[othInd].x - obj1[vPoint].x};
-      let magn = Math.sqrt(projVec.x**2 + projVec.y**2);
+      let magn = Math.hypot(projVec.x, projVec.y);
       projVec.x *= 1/magn;
       projVec.y *= 1/magn;
       let mainMag = polyMags(obj1, projVec);
       let otherMag = circleMags(obj2, projVec);
       if (mainMag.max < otherMag.min || mainMag.min > otherMag.max) {return false;}
     }
+    let projVec = {x: obj1[cPoint].x - obj2.x, y: obj1[cPoint].y - obj2.y};
+    projVec.x *= 1/cDist;
+    projVec.y *= 1/cDist;
+    let mainMag = polyMags(obj1, projVec);
+    let otherMag = circleMags(obj2, projVec);
+    if (mainMag.max < otherMag.min || mainMag.min > otherMag.max) {return false;}
     return true;
   }
   function circleToCircle(obj1, obj2) {
