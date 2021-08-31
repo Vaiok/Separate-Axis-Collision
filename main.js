@@ -2,11 +2,16 @@ const cnvs = document.querySelector('canvas');
 const ctx2d = cnvs.getContext('2d');
 cnvs.width = window.innerWidth;
 cnvs.height = window.innerHeight;
-
+let mPosX, mPosY;
 let superShape, superShapeArr = [], newShapeArr = [], makingShape = false;
 
+function mouseMove(e) {
+  mPosX = e.offsetX;
+  mPosY = e.offsetY;
+}
+
 function createSuperShape(e) {
-  superShapeArr.push(new Shape(ctx2d, e.offsetX, e.offsetY, 0, 55));
+  superShapeArr.push(new Shape(ctx2d, mPosX, mPosY, 0, 55));
   superShape = superShapeArr[superShapeArr.length-1];
 }
 
@@ -14,7 +19,7 @@ function selectSuperShape(e) {
   let shapeFound = false;
   for (let shape of superShapeArr) {
     shape.selected = false;
-    if (Math.hypot(e.offsetX - shape.x, e.offsetY - shape.y) <= shape.rad) {
+    if (Math.hypot(mPosX - shape.x, mPosY - shape.y) <= shape.rad) {
       shape.selected = true;
       superShape = shape;
       shapeFound = true;
@@ -37,16 +42,14 @@ function mouseDown(e) {
     if (e.button === 0) {selectSuperShape(e);}
     if (e.button === 2) {
       if (superShape === undefined) {createSuperShape(e);}
-      else {
-        newShapeArr = [];
-        makingShape = true;
-      }
+      else {makingShape = true;}
     }
   }
   else {
-    if (e.button === 0) {newShapeArr[newShapeArr.length] = {absX: e.offsetX, absY: e.offsetY};}
+    if (e.button === 0) {newShapeArr[newShapeArr.length] = {absX: mPosX, absY: mPosY};}
     if (e.button === 2) {
       createShape();
+      newShapeArr = [];
       makingShape = false;
     }
   }
@@ -64,6 +67,7 @@ function keyPressed(e) {
 }
 
 document.addEventListener('contextmenu', function(e) {e.preventDefault();});
+document.addEventListener('mousemove', mouseMove);
 document.addEventListener('mousedown', mouseDown);
 document.addEventListener('keydown', keyPressed);
 
@@ -96,6 +100,18 @@ function gameLoop() {
   for (sprShp of superShapeArr) {
     sprShp.updatePos();
     sprShp.draw();
+  }
+  if (newShapeArr.length)
+  {
+    ctx2d.strokeStyle = 'yellow';
+    ctx2d.beginPath();
+    ctx2d.moveTo(newShapeArr[0].absX, newShapeArr[0].absY);
+    for (let pnt = 1; pnt < newShapeArr.length; pnt++) {
+      ctx2d.lineTo(newShapeArr[pnt].absX, newShapeArr[pnt].absY);
+    }
+    ctx2d.lineTo(mPosX, mPosY);
+    ctx2d.closePath();
+    ctx2d.stroke();
   }
   window.requestAnimationFrame(gameLoop);
 }

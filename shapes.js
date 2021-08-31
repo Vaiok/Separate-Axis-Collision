@@ -55,6 +55,7 @@ Shape.prototype.draw = function() {
   this.ctx.arc(this.x, this.y, this.rad, 0, Math.PI*2, true);
   this.ctx.fill();
   for (let shape of this.subShps) {
+    this.ctx.strokeStyle = 'white';
     this.ctx.fillStyle = shape.color;
     this.ctx.beginPath();
     if (shape.type === 'polygon') {
@@ -62,6 +63,8 @@ Shape.prototype.draw = function() {
       for (let i = 1; i < shape.pntsArr.length; i++) {this.ctx.lineTo(shape.pntsArr[i].absX, shape.pntsArr[i].absY);}
     }
     if (shape.type === 'circle') {this.ctx.arc(shape.midPnt.absX, shape.midPnt.absY, shape.rad, 0, Math.PI*2, true);}
+    this.ctx.closePath();
     this.ctx.fill();
+    this.ctx.stroke();
   }
 }
