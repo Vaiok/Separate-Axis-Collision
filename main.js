@@ -46,9 +46,19 @@ function mouseDown(e) {
     }
   }
   else {
-    if (e.button === 0) {newShapeArr[newShapeArr.length] = {absX: mPosX, absY: mPosY};}
+    if (e.button === 0) {newShapeArr.push({absX: mPosX, absY: mPosY});}
     if (e.button === 2) {
       createShape();
+
+      if (newShapeArr.length > 2) {
+        let cncv = isConcave(newShapeArr);
+        if (cncv) {
+          console.log('Concave Shape');
+          for (let pnt of cncv) {console.log(`Point: ${pnt}`);}
+        }
+        else {console.log('Convex Shape');}
+      }
+
       newShapeArr = [];
       makingShape = false;
     }
@@ -91,7 +101,6 @@ function gameLoop() {
           if (collision) {shape1.color = 'red', shape2.color = 'red';}
         }
       }
-
     }
   }
   // Draw
