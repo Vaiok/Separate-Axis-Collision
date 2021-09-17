@@ -52,11 +52,11 @@ function mouseDown(e) {
 
       if (newShapeArr.length > 2) {
         let cncv = isConcave(newShapeArr);
-        if (cncv) {
-          console.log('Concave Shape');
-          for (let pnt of cncv) {console.log(`Point: ${pnt}`);}
-        }
+        if (cncv) {console.log('Concave Shape');}
         else {console.log('Convex Shape');}
+        let crln = linesCross(newShapeArr);
+        if (crln) {console.log('Crossed Lines');}
+        else {console.log('No Crossed Lines');}
       }
 
       newShapeArr = [];
