@@ -13,17 +13,27 @@ const sepAx = (function() {
     let pointMag = (obj.x*vec.x + obj.y*vec.y) / (vec.x**2 + vec.y**2);
     return {min: pointMag - obj.rad, max: pointMag + obj.rad};
   }
+  function compareMags(projVec, magn, obj1, obj2, magType) {
+    projVec.x *= 1/magn;
+    projVec.y *= 1/magn;
+    let mainMag = polyMags(obj1, projVec);
+    let otherMag = magType(obj2, projVec);
+    if (mainMag.max < otherMag.min || mainMag.min > otherMag.max) {return false;}
+    else {return true;}
+  }
+  function projectCompare(vPoint, obj1, obj2, magType) {
+    let othInd = vPoint + 1;
+    if (vPoint === obj1.length-1) {othInd = 0;}
+    let projVec = {x: -(obj1[othInd].y - obj1[vPoint].y), y: obj1[othInd].x - obj1[vPoint].x};
+    if (!compareMags(projVec, Math.hypot(projVec.x, projVec.y), obj1, obj2, magType)) {return false;}
+    else {return true;}
+  }
   function polyToPoly(obj1, obj2) {
     for (let obj = 0; obj < 2; obj++) {
       let mainObj = obj1, otherObj = obj2;
       if (obj === 1) {mainObj = obj2, otherObj = obj1;}
       for (let vPoint = 0; vPoint < mainObj.length; vPoint++) {
-        let othInd = vPoint + 1;
-        if (vPoint === mainObj.length-1) {othInd = 0;}
-        let projVec = {x: -(mainObj[othInd].y - mainObj[vPoint].y), y: mainObj[othInd].x - mainObj[vPoint].x};
-        let mainMag = polyMags(mainObj, projVec);
-        let otherMag = polyMags(otherObj, projVec);
-        if (mainMag.max < otherMag.min || mainMag.min > otherMag.max) {return false;}
+        if (!projectCompare(vPoint, mainObj, otherObj, polyMags)) {return false;}
       }
     }
     return true;
@@ -36,22 +46,10 @@ const sepAx = (function() {
         cDist = newDist;
         cPoint = vPoint;
       }
-      let othInd = vPoint + 1;
-      if (vPoint === obj1.length-1) {othInd = 0;}
-      let projVec = {x: -(obj1[othInd].y - obj1[vPoint].y), y: obj1[othInd].x - obj1[vPoint].x};
-      let magn = Math.hypot(projVec.x, projVec.y);
-      projVec.x *= 1/magn;
-      projVec.y *= 1/magn;
-      let mainMag = polyMags(obj1, projVec);
-      let otherMag = circleMags(obj2, projVec);
-      if (mainMag.max < otherMag.min || mainMag.min > otherMag.max) {return false;}
+      if (!projectCompare(vPoint, obj1, obj2, circleMags)) {return false;}
     }
     let projVec = {x: obj1[cPoint].x - obj2.x, y: obj1[cPoint].y - obj2.y};
-    projVec.x *= 1/cDist;
-    projVec.y *= 1/cDist;
-    let mainMag = polyMags(obj1, projVec);
-    let otherMag = circleMags(obj2, projVec);
-    if (mainMag.max < otherMag.min || mainMag.min > otherMag.max) {return false;}
+    if (!compareMags(projVec, cDist, obj1, obj2, circleMags)) {return false;}
     return true;
   }
   function circleToCircle(obj1, obj2) {

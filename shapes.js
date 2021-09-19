@@ -8,45 +8,34 @@ function Shape(ctx, x = 0, y = 0, ang = 0, rad = 25) {
   this.selected = true;
   this.subShps = [];
 }
+Shape.prototype.configShape = function(point) {
+  point.relX = point.absX - this.x;
+  point.relY = point.absY - this.y;
+  point.rad = Math.hypot(point.relX, point.relY);
+  let x1 = point.relX, x2 = point.rad, y1 = point.relY, y2 = 0;
+  let angle = Math.acos((x1*x2 + y1*y2) / (Math.hypot(x1, y1)*Math.hypot(x2, y2)));
+  if (point.relY >= 0) {point.ang = angle - this.ang;}
+  else {point.ang = -angle - this.ang;}
+  return point;
+}
+Shape.prototype.updateConfig = function(point) {
+  point.relX = Math.cos(point.ang + this.ang)*point.rad;
+  point.relY = Math.sin(point.ang + this.ang)*point.rad;
+  point.absX = this.x + point.relX;
+  point.absY = this.y + point.relY;
+  return point;
+}
 Shape.prototype.addSubShape = function(newShape) {
   if (newShape.type === 'polygon') {
-    for (let i = 0; i < newShape.pntsArr.length; i++) {
-      newShape.pntsArr[i].relX = newShape.pntsArr[i].absX - this.x;
-      newShape.pntsArr[i].relY = newShape.pntsArr[i].absY - this.y;
-      newShape.pntsArr[i].rad = Math.hypot(newShape.pntsArr[i].relX, newShape.pntsArr[i].relY);
-      let x1 = newShape.pntsArr[i].relX, x2 = newShape.pntsArr[i].rad, y1 = newShape.pntsArr[i].relY, y2 = 0;
-      let angle = Math.acos((x1*x2 + y1*y2) / (Math.hypot(x1, y1)*Math.hypot(x2, y2)));
-      if (newShape.pntsArr[i].relY >= 0) {newShape.pntsArr[i].ang = angle - this.ang;}
-      else {newShape.pntsArr[i].ang = -angle - this.ang;}
-    }
+    for (let i = 0; i < newShape.pntsArr.length; i++) {newShape.pntsArr[i] = this.configShape(newShape.pntsArr[i]);}
   }
-  if (newShape.type === 'circle') {
-    newShape.midPnt.relX = newShape.midPnt.absX - this.x;
-    newShape.midPnt.relY = newShape.midPnt.absY - this.y;
-    newShape.midPnt.rad = Math.hypot(newShape.midPnt.relX, newShape.midPnt.relY);
-    let x1 = newShape.midPnt.relX, x2 = newShape.midPnt.rad, y1 = newShape.midPnt.relY, y2 = 0;
-    let angle = Math.acos((x1*x2 + y1*y2) / (Math.hypot(x1, y1)*Math.hypot(x2, y2)));
-    if (newShape.midPnt.relY >= 0) {newShape.midPnt.ang = angle - this.ang;}
-    else {newShape.midPnt.ang = -angle - this.ang;}
-  }
+  if (newShape.type === 'circle') {newShape.midPnt = this.configShape(newShape.midPnt);}
   this.subShps.push(newShape);
 }
 Shape.prototype.updatePos = function() {
   for (let shape of this.subShps) {
-    if (shape.type === 'polygon') {
-      for (let pnt of shape.pntsArr) {
-        pnt.relX = Math.cos(pnt.ang + this.ang)*pnt.rad;
-        pnt.relY = Math.sin(pnt.ang + this.ang)*pnt.rad;
-        pnt.absX = this.x + pnt.relX;
-        pnt.absY = this.y + pnt.relY;
-      }
-    }
-    if (shape.type === 'circle') {
-      shape.midPnt.relX = Math.cos(shape.midPnt.ang + this.ang)*shape.midPnt.rad;
-      shape.midPnt.relY = Math.sin(shape.midPnt.ang + this.ang)*shape.midPnt.rad;
-      shape.midPnt.absX = this.x + shape.midPnt.relX;
-      shape.midPnt.absY = this.y + shape.midPnt.relY;
-    }
+    if (shape.type === 'polygon') {for (let pnt of shape.pntsArr) {pnt = this.updateConfig(pnt);}}
+    if (shape.type === 'circle') {shape.midPnt = this.updateConfig(shape.midPnt);}
   }
 }
 Shape.prototype.draw = function() {
