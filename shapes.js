@@ -14,8 +14,7 @@ Shape.prototype.configShape = function(point) {
   point.rad = Math.hypot(point.relX, point.relY);
   let x1 = point.relX, x2 = point.rad, y1 = point.relY, y2 = 0;
   let angle = Math.acos((x1*x2 + y1*y2) / (Math.hypot(x1, y1)*Math.hypot(x2, y2)));
-  if (point.relY >= 0) {point.ang = angle - this.ang;}
-  else {point.ang = -angle - this.ang;}
+  point.ang = (point.relY >= 0) ? (angle - this.ang) : (-angle - this.ang);
   return point;
 }
 Shape.prototype.updateConfig = function(point) {

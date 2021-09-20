@@ -31,8 +31,7 @@ function gameLoop() {
   if (newShapeArr.length)
   {
     newShapeArr.push({absX: mPosX, absY: mPosY});
-    if (vldShp(newShapeArr)) {ctx2d.strokeStyle = 'yellow';}
-    else {ctx2d.strokeStyle = 'red';}
+    ctx2d.strokeStyle = vldShp(newShapeArr) ? 'yellow' : 'red';
     ctx2d.beginPath();
     ctx2d.moveTo(newShapeArr[0].absX, newShapeArr[0].absY);
     for (let pnt = 1; pnt < newShapeArr.length; pnt++) {

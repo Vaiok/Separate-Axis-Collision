@@ -3,9 +3,7 @@ const vldShp = (function() {
     let projVec = {x: -(pnt2.absY - pnt1.absY), y: pnt2.absX - pnt1.absX};
     let vPntMag = (pnt2.absX*projVec.x + pnt2.absY*projVec.y) / (projVec.x**2 + projVec.y**2);
     let nPntMag = (pnt3.absX*projVec.x + pnt3.absY*projVec.y) / (projVec.x**2 + projVec.y**2);
-    if (nPntMag > vPntMag) {return 1;}
-    else if (nPntMag < vPntMag) {return -1;}
-    else {return 0;}
+    return (nPntMag > vPntMag) ? 1 : (nPntMag < vPntMag) ? -1 : 0;
   }
   function isConcave(shapeArr) {
     let grtr = 0, lssr = 0;
@@ -21,8 +19,7 @@ const vldShp = (function() {
     return false;
   }
   function alignedClash(pnt1, pnt2, pnt3) {
-    if (pnt1.absX >= Math.min(pnt2.absX, pnt3.absX) && pnt1.absX <= Math.max(pnt2.absX, pnt3.absX)) {return true;}
-    else {return false;}
+    return (pnt1.absX >= Math.min(pnt2.absX, pnt3.absX) && pnt1.absX <= Math.max(pnt2.absX, pnt3.absX)) ? true : false;
   }
   function linesCross(shapeArr) {
     for (let pnt1 = 0; pnt1 < shapeArr.length; pnt1++) {
@@ -51,7 +48,6 @@ const vldShp = (function() {
   }
 
   return function(shapeArr) {
-    if (shapeArr.length > 3 && (isConcave(shapeArr) || linesCross(shapeArr))) {return false;}
-    else {return true;}
+    return (shapeArr.length > 3 && (isConcave(shapeArr) || linesCross(shapeArr))) ? false : true;
   };
 })();
